@@ -146,9 +146,25 @@ namespace FontStashSharp.Rasterizers.FreeType
 
 					byte* dst = bptr + pos;
 					byte* src = (byte*)ftbmp.buffer + y * ftbmp.pitch;
-					for (var x = 0; x < outWidth; ++x)
+
+					if (ftbmp.pixel_mode == (byte)FT_Pixel_Mode.FT_PIXEL_MODE_GRAY)
 					{
-						*dst++ = *src++;
+						for (var x = 0; x < outWidth; ++x)
+						{
+							*dst++ = *src++;
+						}
+					}
+					else if (ftbmp.pixel_mode == (byte)FT_Pixel_Mode.FT_PIXEL_MODE_MONO)
+					{
+						for (var x = 0; x < outWidth; x += 8)
+						{
+							var bits = *src++;
+							for (int b = 0; b < 8; b++)
+							{
+								var color = ((bits >> (7 - b)) & 1) == 0 ? 0 : 255;
+								*dst++ = (byte)color;
+							}
+						}
 					}
 				}
 			}
