@@ -159,7 +159,7 @@ namespace FontStashSharp.Rasterizers.FreeType
 						for (var x = 0; x < outWidth; x += 8)
 						{
 							var bits = *src++;
-							for (int b = 0; b < 8; b++)
+							for (int b = 0; b < Math.Min(8, ftbmp.width - x); b++)
 							{
 								var color = ((bits >> (7 - b)) & 1) == 0 ? 0 : 255;
 								*dst++ = (byte)color;
