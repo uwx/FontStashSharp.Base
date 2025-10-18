@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Rasterizers.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.Rasterizers.StbTrueTypeSharp", "src\FontStashSharp.Rasterizers.StbTrueTypeSharp\FontStashSharp.Rasterizers.StbTrueTypeSharp.csproj", "{D935B0D1-32AA-40A4-91BB-01B68315282E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.TextShapers.HarfBuzz", "src\FontStashSharp.TextShapers.HarfBuzz\FontStashSharp.TextShapers.HarfBuzz.csproj", "{828611F9-AD5B-4335-914A-AACA1CE31AE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.Base.Tests", "tests\FontStashSharp.Base.Tests\FontStashSharp.Base.Tests.csproj", "{4248A167-3482-4670-B5C4-ECA3EB44B66C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{D935B0D1-32AA-40A4-91BB-01B68315282E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D935B0D1-32AA-40A4-91BB-01B68315282E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D935B0D1-32AA-40A4-91BB-01B68315282E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{828611F9-AD5B-4335-914A-AACA1CE31AE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{828611F9-AD5B-4335-914A-AACA1CE31AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{828611F9-AD5B-4335-914A-AACA1CE31AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{828611F9-AD5B-4335-914A-AACA1CE31AE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4248A167-3482-4670-B5C4-ECA3EB44B66C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4248A167-3482-4670-B5C4-ECA3EB44B66C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4248A167-3482-4670-B5C4-ECA3EB44B66C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4248A167-3482-4670-B5C4-ECA3EB44B66C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
