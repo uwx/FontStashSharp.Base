@@ -166,5 +166,10 @@ namespace FontStashSharp.Rasterizers.FreeType
 				}
 			}
 		}
+
+		public float CalculateScaleForTextShaper(float fontSize)
+		{
+			return fontSize / (float)_faceHandle->units_per_EM;
+		}
 	}
 }

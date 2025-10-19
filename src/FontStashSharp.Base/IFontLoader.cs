@@ -52,6 +52,13 @@ namespace FontStashSharp.Interfaces
 		/// <param name="fontSize"></param>
 		/// <returns></returns>
 		int GetGlyphKernAdvance(int previousGlyphId, int glyphId, float fontSize);
+
+		/// <summary>
+		/// Required for the HarfBuzz Text Shaper
+		/// </summary>
+		/// <param name="fontSize"></param>
+		/// <returns></returns>
+		float CalculateScaleForTextShaper(float fontSize);
 	}
 
 	/// <summary>

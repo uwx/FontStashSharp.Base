@@ -1,5 +1,8 @@
-﻿using System;
+﻿using FontStashSharp.Interfaces;
+using HarfBuzzSharp;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace FontStashSharp
@@ -42,13 +45,14 @@ namespace FontStashSharp
 			public int Start;
 			public int Length;
 			public int TextShaperFontId;
+			public IFontSource FontSource;
 		}
 
-		private static List<FontRun> SegmentTextIntoFontRuns(string text, int start, int length, Func<int, int> codepointToId)
+		private static List<FontRun> SegmentTextIntoFontRuns(string text, int start, int length, Func<int, TextShaperCodePointInfo> codepointInfoGetter)
 		{
 			var runs = new List<FontRun>();
 			int currentRunStart = start;
-			int currentFontId = -1;
+			TextShaperCodePointInfo? currentInfo = null;
 			int end = start + length;
 
 			for (int i = start; i < end;)
@@ -68,38 +72,40 @@ namespace FontStashSharp
 				}
 
 				// Find which font source has this codepoint
-				var fontId = codepointToId(codepoint);
+				var codepointInfo = codepointInfoGetter(codepoint);
 
 				// If this is a new font source, start a new run
-				if (fontId != currentFontId)
+				if (currentInfo == null || codepointInfo.FontId != currentInfo.Value.FontId)
 				{
 					// Save the previous run if it exists
-					if (currentFontId >= 0)
+					if (currentInfo != null)
 					{
 						runs.Add(new FontRun
 						{
 							Start = currentRunStart,
 							Length = i - currentRunStart,
-							TextShaperFontId = currentFontId
+							TextShaperFontId = currentInfo.Value.FontId,
+							FontSource = currentInfo.Value.FontSource
 						});
 					}
 
 					// Start new run
 					currentRunStart = i;
-					currentFontId = fontId;
+					currentInfo = codepointInfo;
 				}
 
 				i += charCount;
 			}
 
 			// Add the final run
-			if (currentFontId >= 0)
+			if (currentInfo != null)
 			{
 				runs.Add(new FontRun
 				{
 					Start = currentRunStart,
 					Length = end - currentRunStart,
-					TextShaperFontId = currentFontId
+					TextShaperFontId = currentInfo.Value.FontId,
+					FontSource = currentInfo.Value.FontSource
 				});
 			}
 
@@ -109,12 +115,11 @@ namespace FontStashSharp
 		/// <summary>
 		/// Shape text using HarfBuzz
 		/// </summary>
-		/// <param name="fontSystem">The font system containing font sources</param>
 		/// <param name="text">The text to shape</param>
 		/// <param name="fontSize">The font size</param>
-		/// <param name="codepointToId">Function that maps codepoint to font id</param>
+		/// <param name="codepointInfoGetter">Function that maps codepoint to font id</param>
 		/// <returns>Shaped text with glyph information</returns>
-		public ShapedText Shape(string text, float fontSize, Func<int, int> codepointToId)
+		public ShapedText Shape(string text, float fontSize, Func<int, TextShaperCodePointInfo> codepointInfoGetter)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -152,7 +157,7 @@ namespace FontStashSharp
 			foreach (var dirRun in directionalRuns)
 			{
 				// Step 3: Within each directional run, segment by font source
-				var fontRuns = SegmentTextIntoFontRuns(text, dirRun.Start, dirRun.Length, codepointToId);
+				var fontRuns = SegmentTextIntoFontRuns(text, dirRun.Start, dirRun.Length, codepointInfoGetter);
 
 				// Step 4: Shape each font run with its appropriate font
 				foreach (var fontRun in fontRuns)
@@ -162,8 +167,6 @@ namespace FontStashSharp
 					{
 						throw new InvalidOperationException($"HarfBuzz font not available for font source {fontRun.TextShaperFontId}. Ensure font data is cached.");
 					}
-
-					hbFont.SetScale(fontSize);
 
 					using (var buffer = new HarfBuzzSharp.Buffer())
 					{
@@ -183,15 +186,17 @@ namespace FontStashSharp
 							var info = glyphInfos[i];
 							var pos = glyphPositions[i];
 
+							var scale = fontRun.FontSource.CalculateScaleForTextShaper(fontSize);
+
 							allShapedGlyphs.Add(new ShapedGlyph
 							{
 								GlyphId = (int)info.Codepoint,
 								Cluster = (int)info.Cluster + fontRun.Start,
 								FontSourceIndex = fontRun.TextShaperFontId,
-								XAdvance = pos.XAdvance,
-								YAdvance = pos.YAdvance,
-								XOffset = pos.XOffset,
-								YOffset = pos.YOffset
+								XAdvance = pos.XAdvance * scale,
+								YAdvance = pos.YAdvance * scale,
+								XOffset = pos.XOffset * scale,
+								YOffset = -pos.YOffset * scale
 							});
 						}
 					}

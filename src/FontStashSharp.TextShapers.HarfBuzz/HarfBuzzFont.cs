@@ -13,9 +13,6 @@ namespace FontStashSharp
 		private Face _face;
 		private Font _font;
 		private GCHandle _fontDataHandle;
-		private int _currentScale = -1;
-
-		public Font Font => _font;
 
 		public HarfBuzzFont(byte[] fontData)
 		{
@@ -29,26 +26,6 @@ namespace FontStashSharp
 			// Create face from blob and font from face
 			_face = new Face(_blob, 0);
 			_font = new Font(_face);
-		}
-
-		/// <summary>
-		/// Set the font scale for a specific font size
-		/// </summary>
-		public void SetScale(float fontSize)
-		{
-			// Convert fontSize to font units
-			// Set scale to 26.6 fixed-point pixels (fontSize * 64)
-			// HarfBuzz will then output positions in 26.6 format directly
-			var scale = (int)(fontSize * 64);
-
-			// Skip if scale hasn't changed
-			if (_currentScale == scale)
-			{
-				return;
-			}
-
-			_currentScale = scale;
-			_font.SetScale(scale, scale);
 		}
 
 		/// <summary>

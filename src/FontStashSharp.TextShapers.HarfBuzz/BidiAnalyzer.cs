@@ -53,13 +53,30 @@ namespace FontStashSharp
 			int runStart = 0;
 			TextDirection? currentDirection = null;
 
-			for (int i = 0; i < text.Length; i++)
+			for (int i = 0; i < text.Length;)
 			{
-				var charDirection = GetStrongDirection(text[i]);
+				// Get the codepoint at position i
+				int codepoint;
+				int charCount;
+				if (i < text.Length - 1 && char.IsSurrogatePair(text, i))
+				{
+					codepoint = char.ConvertToUtf32(text, i);
+					charCount = 2;
+				}
+				else
+				{
+					codepoint = text[i];
+					charCount = 1;
+				}
+
+				var charDirection = GetStrongDirection(codepoint);
 
 				// Skip neutral characters as they belong to the current run
 				if (charDirection == null)
+				{
+					i += charCount;
 					continue;
+				}
 
 				// If direction changes, start a new run
 				if (currentDirection.HasValue && charDirection != currentDirection)
@@ -80,6 +97,8 @@ namespace FontStashSharp
 					// First strong character - leading neutral characters become part of this run
 					currentDirection = charDirection;
 				}
+
+				i += charCount;
 			}
 
 			// Add the final run
@@ -110,7 +129,7 @@ namespace FontStashSharp
 		/// Checks if a character is right-to-left
 		/// </summary>
 		/// <remarks>https://www.ssec.wisc.edu/~tomw/java/unicode.html</remarks>
-		private static bool IsRTL(char c)
+		private static bool IsRTL(int c)
 		{
 			// Hebrew block (U+0590 to U+05FF)
 			if (c >= 0x0590 && c <= 0x05FF) return true;
@@ -162,13 +181,13 @@ namespace FontStashSharp
 		/// <summary>
 		/// Gets the strong directionality of a character
 		/// </summary>
-		private static TextDirection? GetStrongDirection(char c)
+		private static TextDirection? GetStrongDirection(int c)
 		{
 			if (IsRTL(c))
 				return TextDirection.RTL;
 
 			// If not RTL and not neutral, assume LTR
-			if (!IsNeutral(c))
+			if (!IsNeutral((char)c))
 				return TextDirection.LTR;
 
 			return null; // Neutral character

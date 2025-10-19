@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using FontStashSharp.Interfaces;
+using NUnit.Framework;
 using System;
 
 namespace FontStashSharp.Tests
@@ -6,10 +7,51 @@ namespace FontStashSharp.Tests
 	[TestFixture]
 	public class HarfBuzzTests
 	{
+		private class FontSourceMock : IFontSource
+		{
+			public static readonly FontSourceMock Instance = new FontSourceMock();
+
+			private FontSourceMock()
+			{
+			}
+
+			public float CalculateScaleForTextShaper(float fontSize) => 1.0f;
+
+			public void Dispose()
+			{
+				throw new NotImplementedException();
+			}
+
+			public int? GetGlyphId(int codepoint)
+			{
+				throw new NotImplementedException();
+			}
+
+			public int GetGlyphKernAdvance(int previousGlyphId, int glyphId, float fontSize)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void GetGlyphMetrics(int glyphId, float fontSize, out int advance, out int x0, out int y0, out int x1, out int y1)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void GetMetricsForSize(float fontSize, out int ascent, out int descent, out int lineHeight)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void RasterizeGlyphBitmap(int glyphId, float fontSize, byte[] buffer, int startIndex, int outWidth, int outHeight, int outStride)
+			{
+				throw new NotImplementedException();
+			}
+		}
+
 		private class ShaperWrapper
 		{
 			private readonly HarfBuzzTextShaper _shaper;
-			private readonly Func<int, int> _codepointToId;
+			private readonly Func<int, TextShaperCodePointInfo> _codepointToId;
 
 			public ShaperWrapper()
 			{
@@ -19,7 +61,7 @@ namespace FontStashSharp.Tests
 
 				var fontId = _shaper.RegisterTtfFont(assembly.ReadResourceAsBytes("Resources.DroidSans.ttf"));
 
-				_codepointToId = id => fontId;
+				_codepointToId = id => new TextShaperCodePointInfo(fontId, FontSourceMock.Instance);
 			}
 
 			public ShapedText Shape(string text, float size) => _shaper.Shape(text, size, _codepointToId);

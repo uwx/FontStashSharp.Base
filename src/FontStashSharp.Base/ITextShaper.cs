@@ -1,7 +1,28 @@
-﻿using System;
+﻿using FontStashSharp.Interfaces;
+using System;
 
 namespace FontStashSharp
 {
+	public struct TextShaperCodePointInfo
+	{
+		/// <summary>
+		/// Text Shaper Font Id
+		/// </summary>
+		public int FontId;
+
+		/// <summary>
+		/// Font Source
+		/// </summary>
+		public IFontSource FontSource;
+
+		public TextShaperCodePointInfo(int fontId, IFontSource fontSource)
+		{
+			FontId = fontId;
+			FontSource = fontSource ?? throw new ArgumentNullException(nameof(fontSource));
+		}
+	}
+
+
 	public interface ITextShaper
 	{
 		/// <summary>
@@ -20,11 +41,10 @@ namespace FontStashSharp
 		/// <summary>
 		/// Shape text using HarfBuzz
 		/// </summary>
-		/// <param name="fontSystem">The font system containing font sources</param>
 		/// <param name="text">The text to shape</param>
 		/// <param name="fontSize">The font size</param>
-		/// <param name="codepointToId">Function that maps codepoint to font id</param>
+		/// <param name="codePointInfoGetter">Function that maps codepoint to font id</param>
 		/// <returns>Shaped text with glyph information</returns>
-		ShapedText Shape(string text, float fontSize, Func<int, int> codepointToId);
+		ShapedText Shape(string text, float fontSize, Func<int, TextShaperCodePointInfo> codePointInfoGetter);
 	}
 }

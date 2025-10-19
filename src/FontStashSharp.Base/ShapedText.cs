@@ -23,22 +23,22 @@
 		/// <summary>
 		/// Horizontal advance in font units
 		/// </summary>
-		public int XAdvance;
+		public float XAdvance;
 
 		/// <summary>
 		/// Vertical advance in font units
 		/// </summary>
-		public int YAdvance;
+		public float YAdvance;
 
 		/// <summary>
 		/// Horizontal offset in font units
 		/// </summary>
-		public int XOffset;
+		public float XOffset;
 
 		/// <summary>
 		/// Vertical offset in font units
 		/// </summary>
-		public int YOffset;
+		public float YOffset;
 	}
 
 	/// <summary>

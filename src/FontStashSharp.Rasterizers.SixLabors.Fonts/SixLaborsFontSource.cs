@@ -27,6 +27,11 @@ namespace FontStashSharp.Rasterizers.SixLabors.Fonts
 			LineHeightBase = fontInstance.LineHeight / (float)fh;
 		}
 
+		public float CalculateScaleForTextShaper(float fontSize)
+		{
+			throw new System.NotImplementedException();
+		}
+
 		public void Dispose()
 		{
 		}
