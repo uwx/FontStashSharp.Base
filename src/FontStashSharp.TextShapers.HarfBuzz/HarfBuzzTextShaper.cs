@@ -190,7 +190,7 @@ namespace FontStashSharp
 
 							allShapedGlyphs.Add(new ShapedGlyph
 							{
-								GlyphId = (int)info.Codepoint,
+								Codepoint = (int)info.Codepoint,
 								Cluster = (int)info.Cluster + fontRun.Start,
 								FontSourceIndex = fontRun.TextShaperFontId,
 								XAdvance = pos.XAdvance * scale,
