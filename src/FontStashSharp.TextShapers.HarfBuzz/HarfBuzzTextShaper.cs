@@ -168,6 +168,7 @@ namespace FontStashSharp
 						throw new InvalidOperationException($"HarfBuzz font not available for font source {fontRun.TextShaperFontId}. Ensure font data is cached.");
 					}
 
+					var scale = fontRun.FontSource.CalculateScaleForTextShaper(fontSize);
 					using (var buffer = new HarfBuzzSharp.Buffer())
 					{
 						// Add text run to buffer
@@ -186,11 +187,10 @@ namespace FontStashSharp
 							var info = glyphInfos[i];
 							var pos = glyphPositions[i];
 
-							var scale = fontRun.FontSource.CalculateScaleForTextShaper(fontSize);
-
+							// After the shaping, info.Codepoint contains glyph id and not original unicode codepoint
 							allShapedGlyphs.Add(new ShapedGlyph
 							{
-								Codepoint = (int)info.Codepoint,
+								GlyphId = (int)info.Codepoint,
 								Cluster = (int)info.Cluster + fontRun.Start,
 								FontSourceIndex = fontRun.TextShaperFontId,
 								XAdvance = pos.XAdvance * scale,

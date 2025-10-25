@@ -6,9 +6,9 @@
 	public class ShapedGlyph
 	{
 		/// <summary>
-		/// The codepoint
+		/// The glyph id
 		/// </summary>
-		public int Codepoint;
+		public int GlyphId;
 
 		/// <summary>
 		/// The cluster index in the original text
