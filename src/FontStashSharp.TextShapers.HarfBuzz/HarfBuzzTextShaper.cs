@@ -1,8 +1,6 @@
 ﻿using FontStashSharp.Interfaces;
-using HarfBuzzSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 
 namespace FontStashSharp
@@ -44,15 +42,14 @@ namespace FontStashSharp
 		{
 			public int Start;
 			public int Length;
-			public int TextShaperFontId;
-			public IFontSource FontSource;
+			public int FontSourceId;
 		}
 
-		private static List<FontRun> SegmentTextIntoFontRuns(string text, int start, int length, Func<int, TextShaperCodePointInfo> codepointInfoGetter)
+		private static List<FontRun> SegmentTextIntoFontRuns(string text, int start, int length, ITextShapingInfoProvider infoProvider)
 		{
 			var runs = new List<FontRun>();
 			int currentRunStart = start;
-			TextShaperCodePointInfo? currentInfo = null;
+			int? currentFontSourceId = null;
 			int end = start + length;
 
 			for (int i = start; i < end;)
@@ -72,40 +69,38 @@ namespace FontStashSharp
 				}
 
 				// Find which font source has this codepoint
-				var codepointInfo = codepointInfoGetter(codepoint);
+				var fontSourceId = infoProvider.GetFontSourceId(codepoint) ?? 0;
 
 				// If this is a new font source, start a new run
-				if (currentInfo == null || codepointInfo.FontId != currentInfo.Value.FontId)
+				if (currentFontSourceId == null || fontSourceId != currentFontSourceId.Value)
 				{
 					// Save the previous run if it exists
-					if (currentInfo != null)
+					if (currentFontSourceId != null)
 					{
 						runs.Add(new FontRun
 						{
 							Start = currentRunStart,
 							Length = i - currentRunStart,
-							TextShaperFontId = currentInfo.Value.FontId,
-							FontSource = currentInfo.Value.FontSource
+							FontSourceId = currentFontSourceId.Value
 						});
 					}
 
 					// Start new run
 					currentRunStart = i;
-					currentInfo = codepointInfo;
+					currentFontSourceId = fontSourceId;
 				}
 
 				i += charCount;
 			}
 
 			// Add the final run
-			if (currentInfo != null)
+			if (currentFontSourceId != null)
 			{
 				runs.Add(new FontRun
 				{
 					Start = currentRunStart,
 					Length = end - currentRunStart,
-					TextShaperFontId = currentInfo.Value.FontId,
-					FontSource = currentInfo.Value.FontSource
+					FontSourceId = currentFontSourceId.Value
 				});
 			}
 
@@ -117,9 +112,9 @@ namespace FontStashSharp
 		/// </summary>
 		/// <param name="text">The text to shape</param>
 		/// <param name="fontSize">The font size</param>
-		/// <param name="codepointInfoGetter">Function that maps codepoint to font id</param>
+		/// <param name="infoProvider">Provides info for the text shaping</param>
 		/// <returns>Shaped text with glyph information</returns>
-		public ShapedText Shape(string text, float fontSize, Func<int, TextShaperCodePointInfo> codepointInfoGetter)
+		public ShapedText Shape(string text, float fontSize, ITextShapingInfoProvider infoProvider)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -157,18 +152,20 @@ namespace FontStashSharp
 			foreach (var dirRun in directionalRuns)
 			{
 				// Step 3: Within each directional run, segment by font source
-				var fontRuns = SegmentTextIntoFontRuns(text, dirRun.Start, dirRun.Length, codepointInfoGetter);
+				var fontRuns = SegmentTextIntoFontRuns(text, dirRun.Start, dirRun.Length, infoProvider);
 
 				// Step 4: Shape each font run with its appropriate font
 				foreach (var fontRun in fontRuns)
 				{
+					var textShaperFontId = infoProvider.GetTextShaperFontId(fontRun.FontSourceId);
+
 					HarfBuzzFont hbFont;
-					if (!_harfBuzzFonts.TryGetValue(fontRun.TextShaperFontId, out hbFont))
+					if (!_harfBuzzFonts.TryGetValue(textShaperFontId, out hbFont))
 					{
-						throw new InvalidOperationException($"HarfBuzz font not available for font source {fontRun.TextShaperFontId}. Ensure font data is cached.");
+						throw new InvalidOperationException($"HarfBuzz font not available for font source {textShaperFontId}. Ensure font data is cached.");
 					}
 
-					var scale = fontRun.FontSource.CalculateScaleForTextShaper(fontSize);
+					var scale = infoProvider.CalculateScale(fontRun.FontSourceId, fontSize);
 					using (var buffer = new HarfBuzzSharp.Buffer())
 					{
 						// Add text run to buffer
@@ -192,7 +189,7 @@ namespace FontStashSharp
 							{
 								GlyphId = (int)info.Codepoint,
 								Cluster = (int)info.Cluster + fontRun.Start,
-								FontSourceIndex = fontRun.TextShaperFontId,
+								FontSourceId = fontRun.FontSourceId,
 								XAdvance = pos.XAdvance * scale,
 								YAdvance = pos.YAdvance * scale,
 								XOffset = pos.XOffset * scale,

@@ -1,4 +1,4 @@
-﻿namespace FontStashSharp
+﻿namespace FontStashSharp.Interfaces
 {
 	/// <summary>
 	/// Represents a single shaped glyph from HarfBuzz
@@ -18,7 +18,7 @@
 		/// <summary>
 		/// Which font source this glyph is from (for font fallback)
 		/// </summary>
-		public int FontSourceIndex;
+		public int FontSourceId;
 
 		/// <summary>
 		/// Horizontal advance in font units

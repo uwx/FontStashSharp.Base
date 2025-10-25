@@ -1,25 +1,10 @@
-﻿using FontStashSharp.Interfaces;
-using System;
-
-namespace FontStashSharp
+﻿namespace FontStashSharp.Interfaces
 {
-	public struct TextShaperCodePointInfo
+	public interface ITextShapingInfoProvider
 	{
-		/// <summary>
-		/// Text Shaper Font Id
-		/// </summary>
-		public int FontId;
-
-		/// <summary>
-		/// Font Source
-		/// </summary>
-		public IFontSource FontSource;
-
-		public TextShaperCodePointInfo(int fontId, IFontSource fontSource)
-		{
-			FontId = fontId;
-			FontSource = fontSource ?? throw new ArgumentNullException(nameof(fontSource));
-		}
+		int? GetFontSourceId(int codepoint);
+		int GetTextShaperFontId(int fontSourceId);
+		float CalculateScale(int fontSourceId, float fontSize);
 	}
 
 
@@ -43,8 +28,8 @@ namespace FontStashSharp
 		/// </summary>
 		/// <param name="text">The text to shape</param>
 		/// <param name="fontSize">The font size</param>
-		/// <param name="codePointInfoGetter">Function that maps codepoint to font id</param>
+		/// <param name="infoProvider">Provides info for the text shaping</param>
 		/// <returns>Shaped text with glyph information</returns>
-		ShapedText Shape(string text, float fontSize, Func<int, TextShaperCodePointInfo> codePointInfoGetter);
+		ShapedText Shape(string text, float fontSize, ITextShapingInfoProvider infoProvider);
 	}
 }
