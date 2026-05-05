@@ -1,6 +1,5 @@
 ﻿using FontStashSharp.Interfaces;
 using System;
-using System.Drawing;
 using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontStashSharp.Rasterizers.StbTrueTypeSharp
@@ -56,7 +55,7 @@ namespace FontStashSharp.Rasterizers.StbTrueTypeSharp
 			GC.SuppressFinalize(this);
 		}
 
-		private float CalculateScale(float size) => stbtt_ScaleForPixelHeight(_font, size);
+		private float CalculateScale(float size) => _settings.UseEmToPixelsScale ? stbtt_ScaleForMappingEmToPixels(_font, size) : stbtt_ScaleForPixelHeight(_font, size);
 
 		public void GetMetricsForSize(float fontSize, out int ascent, out int descent, out int lineHeight)
 		{
@@ -122,9 +121,6 @@ namespace FontStashSharp.Rasterizers.StbTrueTypeSharp
 			return (int)(result * scale);
 		}
 
-		public float CalculateScaleForTextShaper(float fontSize)
-		{
-			return stbtt_ScaleForPixelHeight(_font, fontSize);
-		}
+		public float CalculateScaleForTextShaper(float fontSize) => _settings.UseEmToPixelsScale ? stbtt_ScaleForMappingEmToPixels(_font, fontSize) : stbtt_ScaleForPixelHeight(_font, fontSize);
 	}
 }
