@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StbTrueTypeSharp" Version="1.26.12" />
+    <PackageReference Include="StbTrueTypeSharp" Version="1.26.13" />
   </ItemGroup>
 
   <ItemGroup>
